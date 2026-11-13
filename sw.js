@@ -1,5 +1,5 @@
-const CACHE_NAME = 'aegis-web-v3';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './privacy-check.html'];
+const CACHE_NAME = 'aegis-web-v4';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './privacy-check.html', './mobile-shield.html'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
