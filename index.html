@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>AEGIS · 隐私保险箱</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#101114;color:#f4f4f5}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#30343c 0,#101114 55%);padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom)}main{max-width:560px;margin:0 auto;padding:30px 0 44px}.brand{letter-spacing:.22em;font-size:12px;color:#a1a1aa}.brand b{color:white;font-size:17px;margin-right:9px}.panel{margin-top:24px;padding:22px;border:1px solid #34363d;border-radius:20px;background:#191a1f;box-shadow:0 18px 60px #0005}h1{font-size:27px;margin:10px 0 8px}p{color:#a1a1aa;line-height:1.55;font-size:14px}.muted{color:#888b95;font-size:12px}label{display:block;font-size:13px;color:#c4c4cc;margin:17px 0 7px}input{width:100%;background:#101115;border:1px solid #41434b;color:white;border-radius:12px;padding:14px;font-size:16px}button,.filelabel{border:0;border-radius:12px;padding:13px 16px;background:#f4f4f5;color:#111217;font-weight:650;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:46px}button.secondary,.filelabel.secondary{background:#292b32;color:#eee;border:1px solid #41434b}button.danger{background:#422326;color:#ffb8bc}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.actions button,.actions .filelabel{flex:1}.hidden{display:none!important}.item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #303139}.item:last-child{border:0}.item .name{flex:1;overflow-wrap:anywhere}.item small{display:block;color:#92949d;margin-top:4px}.item button{min-height:36px;padding:8px 11px}.status{font-size:12px;color:#9da2ad;margin-top:14px;min-height:18px}.warning{border-left:3px solid #b9a36b;padding:9px 12px;background:#29261e;border-radius:5px;color:#d9cfb5;font-size:12px;line-height:1.5;margin-top:16px}.toprow{display:flex;justify-content:space-between;align-items:center}.toprow button{min-height:36px;padding:8px 12px}.empty{text-align:center;padding:28px 0;color:#8c8f99;font-size:14px}footer{text-align:center;color:#737681;font-size:11px;margin:24px 0}
+</style>
+</head>
+<body>
+<main>
+<div class="brand"><b>AEGIS</b> PRIVATE WEB VAULT</div>
+<section id="gate" class="panel">
+<div class="muted">LOCAL ENCRYPTION · AES-256-GCM</div>
+<h1 id="gateTitle">建立你的隐私保险箱</h1>
+<p id="gateDesc">密码只用于在本机派生加密密钥。密码、文件内容和文件名不会上传。</p>
+<label for="password">保险箱密码（至少 12 个字符）</label>
+<input id="password" type="password" autocomplete="current-password" minlength="12" placeholder="输入强密码">
+<div id="confirmWrap"><label for="confirm">再次输入密码</label><input id="confirm" type="password" autocomplete="new-password" placeholder="确认密码"></div>
+<div class="actions">
+<button id="unlock">创建保险箱</button>
+<label class="filelabel secondary" for="restoreFile">恢复加密备份</label>
+<input class="hidden" id="restoreFile" type="file" accept="application/json,.json">
+</div>
+<div class="warning">请使用独一无二的强密码并妥善保存。忘记密码无法恢复文件。清除 Safari 网站数据可能删除本机保险箱，请定期导出加密备份。</div>
+<div class="status" id="gateStatus"></div>
+</section>
+<section id="vault" class="hidden">
+<div class="panel">
+<div class="toprow"><div><div class="muted">ENCRYPTED STORAGE</div><h1>我的保险箱</h1></div><button class="secondary" id="lock">锁定</button></div>
+<p>文件内容与文件名、类型、大小均在本机加密后保存。</p>
+<label class="filelabel" for="addFiles">＋ 添加文件并加密</label>
+<input class="hidden" id="addFiles" type="file" multiple>
+<div id="fileList"></div>
+<div class="actions"><button class="secondary" id="backup">导出加密备份</button></div>
+<div class="status" id="vaultStatus"></div>
+</div>
+<div class="warning">切换到后台时自动锁定，另有 5 分钟自动锁定。单个文件导出为明文，请注意保存位置。建议定期导出加密备份并妥善保管。</div>
+</section>
+<footer>AEGIS WEB · 不收集账号、分析数据或文件</footer>
+</main>
+<script>
+'use strict';
+const DB_NAME='aegis-web-v2', STORE='items', META='meta';
+let db=null, key=null, vaultMeta=null, lockTimer=null;
+const $=id=>document.getElementById(id);
+function say(message,target='gateStatus'){ $(target).textContent=message; }
+function toB64(value){const bytes=new Uint8Array(value);let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(binary);}
+function fromB64(value){return Uint8Array.from(atob(value),c=>c.charCodeAt(0));}
+function randomBytes(length=16){return crypto.getRandomValues(new Uint8Array(length));}
+function request(req){return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+function transactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('数据库事务已中止'));});}
+function openDatabase(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'id'});if(!d.objectStoreNames.contains(META))d.createObjectStore(META);};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+async function readVaultMeta(){return request(db.transaction(META).objectStore(META).get('vault'));}
+async function saveVaultMeta(value){return request(db.transaction(META,'readwrite').objectStore(META).put(value,'vault'));}
+async function deriveKey(password,salt){const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function encryptBytes(bytes){const iv=randomBytes(12);const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,bytes);return {iv:toB64(iv),data:toB64(cipher)};}
+async function decryptBytes(encrypted){return crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(encrypted.iv)},key,fromB64(encrypted.data));}
+async function createOrUnlock(){
+ try{
+  const password=$('password').value;
+  if(password.length<12)throw new Error('密码至少需要 12 个字符。');
+  db=await openDatabase();vaultMeta=await readVaultMeta();
+  if(!vaultMeta){
+   if(password!==$('confirm').value)throw new Error('两次输入的密码不一致。');
+   const salt=randomBytes(16);key=await deriveKey(password,salt);
+   const check=await encryptBytes(new TextEncoder().encode('AEGIS-WEB-VAULT-CHECK-v2'));
+   vaultMeta={version:2,kdf:'PBKDF2-SHA256-310000',salt:toB64(salt),check};
+   await saveVaultMeta(vaultMeta);
+  }else{
+   if(vaultMeta.version!==2)throw new Error('此备份或保险箱版本不兼容。');
+   key=await deriveKey(password,fromB64(vaultMeta.salt));
+   const check=await decryptBytes(vaultMeta.check);
+   if(new TextDecoder().decode(check)!=='AEGIS-WEB-VAULT-CHECK-v2')throw new Error('密码错误，无法解锁。');
+  }
+  $('gate').classList.add('hidden');$('vault').classList.remove('hidden');$('password').value='';$('confirm').value='';
+  await renderItems();resetLockTimer();
+ }catch(error){key=null;say(error.message||'操作失败。');}
+}
+async function getAllRecords(){return request(db.transaction(STORE).objectStore(STORE).getAll());}
+async function decryptRecordMetadata(record){const bytes=await decryptBytes(record.metadata);return JSON.parse(new TextDecoder().decode(bytes));}
+async function renderItems(){
+ const container=$('fileList');container.replaceChildren();const records=await getAllRecords();
+ if(!records.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='保险箱还是空的。添加文件后会在本机加密保存。';container.append(empty);return;}
+ for(const record of records){
+  const metadata=await decryptRecordMetadata(record);
+  const row=document.createElement('div');row.className='item';
+  const name=document.createElement('div');name.className='name';name.textContent=metadata.name;
+  const detail=document.createElement('small');detail.textContent=(metadata.size/1024).toFixed(1)+' KB · 已加密';name.append(detail);
+  const exportButton=document.createElement('button');exportButton.className='secondary';exportButton.textContent='导出';exportButton.addEventListener('click',()=>exportRecord(record,metadata));
+  const deleteButton=document.createElement('button');deleteButton.className='danger';deleteButton.textContent='删除';deleteButton.addEventListener('click',async()=>{if(confirm('确定永久删除这个加密文件？')){const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(record.id);await transactionDone(tx);await renderItems();}});
+  row.append(name,exportButton,deleteButton);container.append(row);
+ }
+}
+async function addFiles(fileList){
+ try{
+  for(const file of fileList){
+   const id=crypto.randomUUID();
+   const fileCipher=await encryptBytes(await file.arrayBuffer());
+   const metadataCipher=await encryptBytes(new TextEncoder().encode(JSON.stringify({name:file.name,size:file.size,type:file.type||'application/octet-stream'})));
+   const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put({id,metadata:metadataCipher,content:fileCipher});await transactionDone(tx);
+  }
+  say('文件已加密并保存在此浏览器。','vaultStatus');await renderItems();
+ }catch(error){say('添加失败：'+error.message,'vaultStatus');}
+}
+async function exportRecord(record,metadata){
+ try{const bytes=await decryptBytes(record.content);const blob=new Blob([bytes],{type:metadata.type});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download=metadata.name;anchor.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+ catch(error){say('解密失败：'+error.message,'vaultStatus');}
+}
+async function exportBackup(){
+ try{
+  const backup={format:'AEGIS-WEB-ENCRYPTED-BACKUP',version:2,vault:vaultMeta,records:await getAllRecords()};
+  const blob=new Blob([JSON.stringify(backup)],{type:'application/json'});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download='aegis-encrypted-backup.json';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  say('加密备份已导出。文件名和内容均已加密，恢复时仍需要密码。','vaultStatus');
+ }catch(error){say('备份失败：'+error.message,'vaultStatus');}
+}
+async function restoreBackup(file){
+ try{
+  db=await openDatabase();const existing=await readVaultMeta();if(existing)throw new Error('当前浏览器已有保险箱。为避免覆盖，请使用一个没有建立过 AEGIS 保险箱的浏览器配置恢复。');
+  const backup=JSON.parse(await file.text());
+  if(backup.format!=='AEGIS-WEB-ENCRYPTED-BACKUP'||backup.version!==2||!backup.vault||!Array.isArray(backup.records))throw new Error('备份格式无效或版本不兼容。');
+  const password=$('password').value;if(password.length<12)throw new Error('请先在密码框输入备份密码（至少 12 个字符）。');
+  const importedKey=await deriveKey(password,fromB64(backup.vault.salt));
+  const check=await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(backup.vault.check.iv)},importedKey,fromB64(backup.vault.check.data));
+  if(new TextDecoder().decode(check)!=='AEGIS-WEB-VAULT-CHECK-v2')throw new Error('密码错误，无法恢复备份。');
+  for(const record of backup.records){
+   if(!record.id||!record.metadata?.iv||!record.metadata?.data||!record.content?.iv||!record.content?.data)throw new Error('备份中存在无效记录。');
+   const metaBytes=await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(record.metadata.iv)},importedKey,fromB64(record.metadata.data));
+   const parsed=JSON.parse(new TextDecoder().decode(metaBytes));
+   if(typeof parsed.name!=='string'||typeof parsed.size!=='number'||typeof parsed.type!=='string')throw new Error('备份元数据校验失败。');
+   await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(record.content.iv)},importedKey,fromB64(record.content.data));
+  }
+  const tx=db.transaction([STORE,META],'readwrite');tx.objectStore(META).put(backup.vault,'vault');for(const record of backup.records)tx.objectStore(STORE).put(record);await transactionDone(tx);
+  vaultMeta=backup.vault;key=importedKey;$('gate').classList.add('hidden');$('vault').classList.remove('hidden');$('password').value='';$('confirm').value='';await renderItems();resetLockTimer();say('备份恢复成功。','vaultStatus');
+ }catch(error){key=null;say(error.message||'恢复失败。');}
+}
+function lockVault(){
+ key=null;if(lockTimer)clearTimeout(lockTimer);$('vault').classList.add('hidden');$('gate').classList.remove('hidden');$('gateTitle').textContent='保险箱已锁定';$('gateDesc').textContent='输入密码以解锁本机保险箱。';$('confirmWrap').classList.add('hidden');$('unlock').textContent='解锁';$('password').value='';say('已锁定。');
+}
+function resetLockTimer(){if(lockTimer)clearTimeout(lockTimer);lockTimer=setTimeout(lockVault,5*60*1000);}
+$('unlock').addEventListener('click',createOrUnlock);
+$('lock').addEventListener('click',lockVault);
+$('addFiles').addEventListener('change',async event=>{if(event.target.files.length)await addFiles(event.target.files);event.target.value='';});
+$('backup').addEventListener('click',exportBackup);
+$('restoreFile').addEventListener('change',async event=>{if(event.target.files[0])await restoreBackup(event.target.files[0]);event.target.value='';});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&key)lockVault();});
+['click','touchstart','keydown'].forEach(type=>document.addEventListener(type,()=>{if(key)resetLockTimer();},{passive:true}));
+(async()=>{
+ if(!window.isSecureContext||!crypto.subtle){say('需要通过 HTTPS 打开本网页，才能使用安全加密。');$('unlock').disabled=true;return;}
+ try{db=await openDatabase();vaultMeta=await readVaultMeta();if(vaultMeta){$('gateTitle').textContent='解锁隐私保险箱';$('gateDesc').textContent='输入创建保险箱时设置的密码。';$('confirmWrap').classList.add('hidden');$('unlock').textContent='解锁';}if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+ catch(error){say('浏览器本地存储不可用：'+error.message);}
+})();
+</script>
+</body>
+</html>
