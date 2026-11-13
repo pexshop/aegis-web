@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AEGIS · VPN 与代理检测</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#101114;color:#f4f4f5}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#30343c 0,#101114 55%);padding:env(safe-area-inset-top) 17px env(safe-area-inset-bottom)}
+main{max-width:650px;margin:0 auto;padding:25px 0 45px}.brand{letter-spacing:.18em;font-size:12px;color:#a1a1aa}.brand b{font-size:17px;color:white;margin-right:8px}
+a{color:#d6d6df}.back{display:inline-block;margin:20px 0 0;font-size:13px}
+.panel{margin-top:16px;padding:19px;border:1px solid #34363d;border-radius:17px;background:#191a1f;box-shadow:0 15px 45px #0004}
+h1{font-size:26px;margin:12px 0 7px}h2{font-size:17px;margin:0 0 10px}p{font-size:13px;line-height:1.6;color:#a1a1aa}
+.muted{font-size:11px;color:#92949d;letter-spacing:.08em}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+button{border:0;border-radius:11px;padding:13px 15px;background:#f4f4f5;color:#111217;font-weight:650;font-size:14px;min-height:45px;cursor:pointer}
+button.secondary{background:#292b32;color:#eee;border:1px solid #41434b}button:disabled{opacity:.5}
+.status{font-size:12px;color:#a1a1aa;min-height:18px;margin-top:10px}.verdict{font-size:21px;font-weight:700;margin:8px 0}
+.good{color:#79c99a}.warn{color:#e0bd70}.bad{color:#e88b8b}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}.item{background:#111217;border:1px solid #303139;border-radius:11px;padding:12px;min-width:0}
+.k{font-size:11px;color:#92949d;margin-bottom:6px}.v{font-size:14px;overflow-wrap:anywhere}
+.bar{height:8px;background:#303139;border-radius:10px;overflow:hidden;margin:12px 0}.fill{height:100%;width:0;background:#d9d9df;transition:width .25s}
+.row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #303139;font-size:13px}.row:last-child{border:0}.row span:last-child{text-align:right;overflow-wrap:anywhere}
+.note{border-left:3px solid #b9a36b;padding:10px 12px;background:#29261e;border-radius:5px;color:#d9cfb5;font-size:12px;line-height:1.6;margin-top:12px}
+.note.danger{border-left-color:#b56e72;background:#2b2022;color:#e7c5c7}
+.small{font-size:11px;color:#92949d;line-height:1.6;overflow-wrap:anywhere}footer{text-align:center;color:#737681;font-size:11px;margin:24px 0}
+</style>
+</head>
+<body><main>
+<div class="brand"><b>AEGIS</b> PRIVACY & NETWORK SECURITY</div>
+<a class="back" href="./index.html">← 返回 AEGIS</a>
+<a class="back" style="margin-left:14px" href="./privacy-check.html">手机隐私安全检查</a>
+<section class="panel">
+<div class="muted">PUBLIC IP INTELLIGENCE</div>
+<h1>VPN 与代理检测</h1>
+<p>检测当前 Safari 连接出口的公网 IP，识别已知 VPN、代理、Tor、隐私中继和数据中心网络。检测由 IPLogs 提供。</p>
+<div class="actions"><button id="run">开始检测</button><button class="secondary" id="again" disabled>重新检测</button></div>
+<div id="status" class="status" aria-live="polite">尚未检测</div>
+</section>
+<section id="result" class="panel" hidden aria-live="polite">
+<div class="muted">DETECTION RESULT</div>
+<div id="verdict" class="verdict">—</div>
+<div class="bar"><div id="fill" class="fill"></div></div>
+<div id="score" class="small"></div>
+<div class="grid">
+<div class="item"><div class="k">公网 IP</div><div class="v" id="ip">—</div></div>
+<div class="item"><div class="k">VPN / 中继提供商</div><div class="v" id="provider">—</div></div>
+<div class="item"><div class="k">国家 / 地区</div><div class="v" id="country">—</div></div>
+<div class="item"><div class="k">城市</div><div class="v" id="city">—</div></div>
+<div class="item"><div class="k">网络组织</div><div class="v" id="org">—</div></div>
+<div class="item"><div class="k">ASN</div><div class="v" id="asn">—</div></div>
+</div>
+<h2 style="margin-top:20px">检测项目</h2>
+<div id="flags"></div>
+<h2 style="margin-top:20px">命中信号</h2>
+<div id="signals" class="small">—</div>
+<div id="meta" class="small" style="margin-top:12px"></div>
+</section>
+<section class="panel">
+<h2>隐私与技术限制</h2>
+<p>点击检测后，浏览器会把请求发送到 IPLogs。该服务会看到你的公网 IP、浏览器时区和语言，并据此判断出口网络。无需 API Key；服务有速率限制和缓存策略。</p>
+<div class="note">iPhone 网页无法直接读取 iOS「设置」中的 VPN 开关，也不能扫描设备进程、其他 App 或配置描述文件。检测结果只反映当前网络出口的情报，不是设备是否被监控或感染的结论。</div>
+<div class="note danger">住宅代理、全新 VPN 节点或情报库未收录的节点可能漏报；数据中心、企业安全网关、iCloud Private Relay 或 Cloudflare WARP 也可能出现需要结合场景理解的结果。检测失败代表未知，不代表安全。</div>
+<p class="small">检测接口：<a href="https://iplogs.com/docs" target="_blank" rel="noopener noreferrer">IPLogs 官方文档</a>。分数是证据强度评分，不是使用 VPN 的概率。</p>
+</section>
+<footer>AEGIS WEB · VPN CHECK · 检测结果仅供参考</footer>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const text = (value, fallback='未知') => value === null || value === undefined || value === '' ? fallback : String(value);
+function addRow(label,value){
+ const row=document.createElement('div');row.className='row';
+ const left=document.createElement('span');left.textContent=label;
+ const right=document.createElement('span');right.textContent=value;
+ row.append(left,right);$('flags').append(row);
+}
+function showSignal(signal){
+ const row=document.createElement('div');row.className='row';
+ const left=document.createElement('span');left.textContent=text(signal.type,'信号');
+ const right=document.createElement('span');right.textContent=text(signal.detail, '已命中')+' · 权重 '+text(signal.weight,'—');
+ row.append(left,right);$('signals').append(row);
+}
+async function runCheck(){
+ const button=$('run'),again=$('again');
+ button.disabled=true;again.disabled=true;button.textContent='正在检测…';
+ $('status').textContent='正在连接检测服务，完整检测可能需要数秒。';
+ $('result').hidden=true;
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),35000);
+ try{
+  const response=await fetch('https://iplogs.com/v1/check',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({
+    timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,
+    language:navigator.language
+   }),
+   signal:controller.signal
+  });
+  let data;
+  try{data=await response.json();}catch(e){throw new Error('检测服务返回了无法读取的数据。');}
+  if(!response.ok)throw new Error(text(data.error,'HTTP '+response.status));
+  if(data.error)throw new Error(data.error);
+  const info=data.ip_info||{};
+  const verdicts={
+   clean:['未发现明显 VPN / 代理迹象','good'],
+   suspicious:['网络存在可疑迹象','warn'],
+   vpn_likely:['很可能使用 VPN / 匿名网络','bad'],
+   vpn_detected:['检测到 VPN / 匿名网络迹象','bad']
+  };
+  const choice=verdicts[data.verdict]||['检测完成','warn'];
+  $('verdict').textContent=choice[0];$('verdict').className='verdict '+choice[1];
+  const score=Number(data.score);
+  if(Number.isFinite(score)){
+   const pct=Math.max(0,Math.min(100,Math.round(score*100)));
+   $('fill').style.width=pct+'%';
+   $('score').textContent='风险信号评分：'+pct+'/100（不是 VPN 概率）';
+  }else{$('score').textContent='服务未返回评分。';}
+  $('ip').textContent=text(info.ip);
+  $('provider').textContent=text(info.vpn_provider,'未识别');
+  $('country').textContent=[info.country,info.country_code].filter(Boolean).join(' / ')||'未知';
+  $('city').textContent=text(info.city);
+  $('org').textContent=text(info.org);
+  $('asn').textContent=text(info.asn);
+  $('flags').replaceChildren();
+  addRow('VPN',data.is_vpn?'发现':'未发现');
+  addRow('代理',data.is_proxy?'发现':'未发现');
+  addRow('Tor 出口',data.is_tor?'发现':'未发现');
+  addRow('隐私中继 / WARP / Private Relay',data.is_relay?'发现':'未发现');
+  addRow('数据中心 / 云主机',data.is_hosting?'发现':'未发现');
+  $('signals').replaceChildren();
+  const signals=Array.isArray(data.signals)?data.signals:[];
+  const matched=signals.filter(s=>s&&s.matched);
+  if(matched.length)matched.forEach(showSignal);
+  else $('signals').textContent='没有返回命中的详细信号。';
+  $('meta').textContent='检测时间：'+new Date().toLocaleString()+' · 模式：'+(data.mode||'完整检测')+' · 请求编号：'+text(data.request_id,'无');
+  $('result').hidden=false;
+  $('status').textContent=data.mode==='fast'?'已完成快速检测（未执行全部实时探测）。':'检测完成。';
+ }catch(error){
+  $('status').textContent=error.name==='AbortError'?'检测超时，请稍后重试。':'检测失败：'+error.message+'。请检查网络或稍后重试。';
+ }finally{
+  clearTimeout(timeout);button.disabled=false;again.disabled=false;button.textContent='开始检测';again.onclick=runCheck;
+ }
+}
+$('run').addEventListener('click',runCheck);
+</script>
+</body></html>
