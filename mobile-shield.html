@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>AEGIS · iPhone 防追踪加固</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#101114;color:#f4f4f5}*{box-sizing:border-box}body{margin:0;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);background:radial-gradient(ellipse at 50% -20%,#30343c 0,#101114 55%);min-height:100vh}main{max-width:620px;margin:auto;padding:25px 0 42px}.brand{font-size:12px;letter-spacing:.18em;color:#a1a1aa}.brand b{font-size:17px;color:white;margin-right:8px}a{color:#ddd}.back{display:inline-block;margin:18px 0;font-size:13px}.panel{background:#191a1f;border:1px solid #34363d;border-radius:17px;padding:18px;margin:14px 0}h1{font-size:25px;margin:12px 0 8px}h2{font-size:17px;margin:0 0 9px}p{font-size:13px;line-height:1.6;color:#a1a1aa}.eyebrow{font-size:10px;letter-spacing:.12em;color:#999}.item{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid #303139;align-items:flex-start}.item:last-child{border:0}.item input{width:19px;height:19px;flex:none;margin:1px 0 0;accent-color:#d8d8df}.item span{font-size:13px;line-height:1.5}.item small{display:block;color:#999ca6;font-size:11px;margin-top:3px;line-height:1.5}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:11px;padding:12px 15px;background:#f4f4f5;color:#111217;font-size:13px;font-weight:650;min-height:43px}button.secondary{background:#292b32;color:#eee;border:1px solid #41434b}.status{font-size:12px;color:#a1a1aa;margin-top:12px;line-height:1.5}.note{padding:11px 12px;border-left:3px solid #b9a36b;background:#29261e;color:#d9cfb5;border-radius:5px;font-size:12px;line-height:1.6}.danger{border-left-color:#b56e72;background:#2b2022;color:#e7c5c7}footer{text-align:center;color:#737681;font-size:11px;margin:24px 0}
+</style>
+</head>
+<body><main>
+<div class="brand"><b>AEGIS</b> IPHONE HARDENING</div>
+<a class="back" href="./privacy-check.html">← 返回隐私安全检查</a>
+<section class="panel">
+<div class="eyebrow">LOCAL-ONLY SECURITY GUIDE</div>
+<h1>iPhone 防追踪加固</h1>
+<p>这是在 iPhone 本机 Safari 打开的设置向导。它不会连接服务器、上传数据或自动更改系统设置；请你在 iPhone「设置」中亲自确认。勾选进度只保存在当前浏览器。</p>
+<div class="note">先做高收益项目：更新 iOS、检查 Apple 账户设备、运行安全检查、审查设备管理/VPN，并开启 Safari 防跨站跟踪。</div>
+</section>
+<section class="panel">
+<div class="eyebrow">PRIORITY 1 · DEVICE SECURITY</div><h2>设备与账户</h2>
+<label class="item"><input type="checkbox" data-key="ios"><span>安装最新适用的 iOS 更新<small>设置 → 通用 → 软件更新。保持自动更新开启。</small></span></label>
+<label class="item"><input type="checkbox" data-key="safety"><span>运行 Apple 安全检查（Safety Check）<small>设置 → 隐私与安全性 → 安全检查。检查共享对象、App 访问权限和账户安全。</small></span></label>
+<label class="item"><input type="checkbox" data-key="devices"><span>检查 Apple 账户中的设备<small>设置 → 你的姓名。移除前先确认不认识的设备确实不属于你；必要时从可信设备更改账户密码并确认双重认证。</small></span></label>
+<label class="item"><input type="checkbox" data-key="profiles"><span>检查 VPN 与设备管理<small>设置 → 通用 → VPN 与设备管理。核实所有描述文件、MDM 管理和 VPN 的来源。公司/学校设备不要擅自移除管理配置。</small></span></label>
+<label class="item"><input type="checkbox" data-key="passcode"><span>加强锁屏密码与账户恢复安全<small>使用不易猜测的设备密码；核对受信任电话号码、恢复联系人和双重认证。</small></span></label>
+<label class="item"><input type="checkbox" data-key="lockdown"><span>评估是否开启锁定模式（Lockdown Mode）<small>设置 → 隐私与安全性 → 锁定模式。它面向可能遭受高度复杂定向攻击的少数用户，会限制部分功能；普通用户不一定需要开启。</small></span></label>
+</section>
+<section class="panel">
+<div class="eyebrow">PRIORITY 2 · SAFARI PRIVACY</div><h2>Safari 防追踪设置</h2>
+<label class="item"><input type="checkbox" data-key="cross"><span>开启「防止跨网站跟踪」<small>设置 → App → Safari（较旧 iOS：设置 → Safari）→ 隐私与安全性 → 防止跨网站跟踪。</small></span></label>
+<label class="item"><input type="checkbox" data-key="ip"><span>隐藏 IP 地址<small>Safari → 隐私与安全性 → 隐藏 IP 地址。若可选，选择「来自跟踪器」或按你的 iCloud+ 设置选择适当选项。</small></span></label>
+<label class="item"><input type="checkbox" data-key="fraud"><span>开启欺诈性网站警告<small>Safari → 隐私与安全性 → 欺诈性网站警告。</small></span></label>
+<label class="item"><input type="checkbox" data-key="extensions"><span>审查 Safari 扩展与内容拦截器<small>设置 → App → Safari → 扩展。只安装可信开发者的扩展，核实扩展权限；不要安装来历不明的“反监控证书”或描述文件。</small></span></label>
+<label class="item"><input type="checkbox" data-key="private"><span>使用私人浏览处理敏感的一次性会话<small>Safari 标签页 → 私人浏览。私人浏览不会让你对网站、网络运营商或设备管理者隐身。</small></span></label>
+</section>
+<section class="panel">
+<div class="eyebrow">PRIORITY 3 · APP PERMISSIONS</div><h2>App 权限与网络使用</h2>
+<label class="item"><input type="checkbox" data-key="location"><span>审查定位权限<small>设置 → 隐私与安全性 → 定位服务。对不需要持续定位的 App，改为「使用 App 期间」或「永不」，并审查精确位置。</small></span></label>
+<label class="item"><input type="checkbox" data-key="sensors"><span>审查相机、麦克风、照片、蓝牙与通讯录权限<small>设置 → 隐私与安全性。撤销不必要的权限；留意状态栏的麦克风/相机指示点。</small></span></label>
+<label class="item"><input type="checkbox" data-key="report"><span>开启并查看 App 隐私报告<small>设置 → 隐私与安全性 → App 隐私报告。它记录部分传感器访问和网络域名活动，不会判断某个域名一定恶意。</small></span></label>
+<label class="item"><input type="checkbox" data-key="cellular"><span>核对蜂窝数据与电池用量<small>设置 → 蜂窝网络、设置 → 电池。异常用量值得调查，但不能单独证明被监控。</small></span></label>
+</section>
+<section class="panel">
+<div class="eyebrow">PROGRESS</div><h2>加固完成情况</h2><div id="progress" class="status" aria-live="polite">尚未勾选</div>
+<div class="actions"><button id="export">导出本地进度报告</button><button class="secondary" id="reset">清除勾选</button></div>
+</section>
+<section class="panel">
+<h2>能力边界</h2>
+<p>网页不能扫描 iOS 系统进程、其他 App、短信/通话记录、完整安装清单、系统文件或所有配置描述文件；不能自动关闭系统监控，也不能可靠检测 Pegasus 等高级间谍软件。此页面是设置加固向导，不是杀毒或取证工具。不要把“全部勾选”理解为“手机已确认安全”。</p>
+<div class="note danger">若你怀疑自己是定向攻击目标，请不要依赖网页检测结果。使用另一台可信设备联系 Apple 支持或专业移动设备取证机构，并考虑由专业人员评估锁定模式。</div>
+</section>
+<footer>AEGIS · 不联网 · 不上传 · 本地设置向导</footer>
+</main>
+<script>
+'use strict';
+const boxes=[...document.querySelectorAll('input[type=checkbox]')];
+const progress=document.getElementById('progress');
+function refresh(){const n=boxes.filter(x=>x.checked).length;progress.textContent='已完成查看 '+n+' / '+boxes.length+' 项。此进度只表示你勾选了项目，不代表系统扫描通过。';}
+try{boxes.forEach(x=>{x.checked=localStorage.getItem('aegis-hardening-'+x.dataset.key)==='1';x.addEventListener('change',()=>{try{localStorage.setItem('aegis-hardening-'+x.dataset.key,x.checked?'1':'0');}catch(e){}refresh();});});}catch(e){}
+document.getElementById('reset').addEventListener('click',()=>{boxes.forEach(x=>{x.checked=false;try{localStorage.removeItem('aegis-hardening-'+x.dataset.key);}catch(e){}});refresh();});
+document.getElementById('export').addEventListener('click',()=>{const report={product:'AEGIS iPhone Hardening Guide',createdAt:new Date().toISOString(),notice:'Checklist only. Not a device scan or malware verdict.',completed:boxes.filter(x=>x.checked).map(x=>x.dataset.key),total:boxes.length};const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='aegis-iphone-hardening-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);});
+refresh();
+</script>
+</body></html>
