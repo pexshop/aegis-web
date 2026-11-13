@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>AEGIS · 手机隐私安全检查</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#101114;color:#f4f4f5}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#30343c 0,#101114 55%);padding:env(safe-area-inset-top) 17px env(safe-area-inset-bottom)}main{max-width:650px;margin:0 auto;padding:25px 0 45px}.brand{letter-spacing:.18em;font-size:12px;color:#a1a1aa}.brand b{font-size:17px;color:white;margin-right:8px}a{color:#d6d6df}.back{display:inline-block;margin:20px 0 0;font-size:13px}.panel{margin-top:16px;padding:19px;border:1px solid #34363d;border-radius:17px;background:#191a1f;box-shadow:0 15px 45px #0004}h1{font-size:26px;margin:12px 0 7px}h2{font-size:17px;margin:0 0 10px}p,.desc{font-size:13px;line-height:1.6;color:#a1a1aa}.muted{font-size:11px;color:#92949d;letter-spacing:.08em}.result{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid #303139}.result:last-child{border:0}.dot{width:9px;height:9px;border-radius:50%;background:#777;flex:none;margin-top:5px}.dot.ok{background:#72bd91}.dot.warn{background:#d6ae5d}.dot.na{background:#858894}.rbody{flex:1;min-width:0}.rtitle{font-size:14px;font-weight:650}.rdetail{font-size:12px;color:#a1a1aa;line-height:1.5;margin-top:4px;overflow-wrap:anywhere}.tag{font-size:10px;color:#bfc1ca;border:1px solid #444650;border-radius:20px;padding:3px 7px;white-space:nowrap}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}button{border:0;border-radius:11px;padding:12px 15px;background:#f4f4f5;color:#111217;font-weight:650;font-size:13px;min-height:43px;cursor:pointer}button.secondary{background:#292b32;color:#eee;border:1px solid #41434b}.check{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #303139;font-size:13px;line-height:1.5;color:#e1e1e7}.check:last-child{border:0}.check input{width:18px;height:18px;margin:0;accent-color:#d8d8df;flex:none}.check small{display:block;color:#999ca6;font-size:11px;margin-top:3px}.note{border-left:3px solid #b9a36b;padding:10px 12px;background:#29261e;border-radius:5px;color:#d9cfb5;font-size:12px;line-height:1.55;margin-top:12px}.danger{border-left-color:#b56e72;background:#2b2022;color:#e7c5c7}.status{font-size:12px;color:#a1a1aa;min-height:18px;margin-top:10px}footer{text-align:center;color:#737681;font-size:11px;margin:24px 0}
+</style>
+</head>
+<body>
+<main>
+<div class="brand"><b>AEGIS</b> PRIVACY CHECK</div>
+<a class="back" href="./index.html">← 返回隐私保险箱</a>
+<section class="panel">
+<div class="muted">LOCAL BROWSER DIAGNOSTICS</div>
+<h1>手机隐私安全检查</h1>
+<p>本页只检查当前 Safari 网页环境能访问的项目，并提供 iPhone 系统自查向导。它不是杀毒软件，也不能扫描 iOS 系统进程或其他 App。</p>
+<div class="actions"><button id="run">重新检测</button><button class="secondary" id="report">导出本地检查报告</button></div>
+<div id="summary" class="status" aria-live="polite">准备检测…</div>
+<div id="results"></div>
+<div class="note">隐私说明：检测在本机浏览器执行；本页面不连接外部服务器、不上传报告，也不会主动申请摄像头、麦克风或定位权限。</div>
+</section>
+<section class="panel">
+<div class="muted">IPHONE SYSTEM SELF-CHECK</div>
+<h2>iPhone 系统检查向导</h2>
+<p>请在 iPhone「设置」中逐项检查。勾选只代表你已完成查看，不代表系统已被扫描或确认绝对安全。</p>
+<div id="checklist">
+<label class="check"><input type="checkbox" data-item="iOS更新"><span>检查 iOS 更新<small>设置 → 通用 → 软件更新。安装 Apple 提供的最新适用更新。</small></span></label>
+<label class="check"><input type="checkbox" data-item="设备管理与描述文件"><span>检查未知配置描述文件或设备管理<small>设置 → 通用 → VPN 与设备管理。确认每个配置、MDM 管理项均由你或可信组织安装；不认识的项目先核实来源，不要贸然删除公司/学校配置。</small></span></label>
+<label class="check"><input type="checkbox" data-item="VPN"><span>检查 VPN 配置<small>设置 → VPN（或 通用 → VPN 与设备管理）。确认 VPN 服务、连接状态和配置来源。</small></span></label>
+<label class="check"><input type="checkbox" data-item="Apple账户设备"><span>检查 Apple 账户登录设备<small>设置 → 你的姓名。查看设备列表，核实是否有不认识的设备；必要时从可信设备更改 Apple 账户密码。</small></span></label>
+<label class="check"><input type="checkbox" data-item="安全检查"><span>运行安全检查（Safety Check）<small>设置 → 隐私与安全性 → 安全检查。查看与他人共享的信息、App 访问权限和账户安全。菜单名称可能因 iOS 版本和地区不同。</small></span></label>
+<label class="check"><input type="checkbox" data-item="隐私权限"><span>检查 App 隐私权限<small>设置 → 隐私与安全性。逐项检查定位服务、麦克风、相机、蓝牙、通讯录、照片等权限，关闭不需要的访问。</small></span></label>
+<label class="check"><input type="checkbox" data-item="App隐私报告"><span>检查 App 隐私报告<small>设置 → 隐私与安全性 → App 隐私报告。启用后观察 App 对传感器和网络域名的访问记录；它不是间谍软件扫描器。</small></span></label>
+<label class="check"><input type="checkbox" data-item="锁屏与账户恢复"><span>检查锁屏密码与账户恢复方式<small>确认设备密码足够强，检查受信任电话号码、账户恢复联系人和双重认证设置。</small></span></label>
+<label class="check"><input type="checkbox" data-item="未知应用"><span>检查主屏幕和 App 资源库中的未知 App<small>核实不认识的 App、企业应用或侧载来源。iOS 不提供网页读取完整 App 安装清单的权限。</small></span></label>
+<label class="check"><input type="checkbox" data-item="异常迹象"><span>记录异常迹象并核实<small>异常耗电、流量或发热可能有很多原因，不能单独证明手机被监控。查看设置中的电池和蜂窝网络用量。</small></span></label>
+</div>
+<div class="actions"><button class="secondary" id="clear">清除勾选</button></div>
+</section>
+<section class="panel">
+<div class="muted">IMPORTANT LIMITATIONS</div>
+<h2>网页无法检测的项目</h2>
+<p>iOS 的沙盒和浏览器权限限制意味着本网页无法扫描其他 App 的进程、读取短信/通话记录、列出完整安装应用、检查系统文件、检测越狱状态、识别所有恶意配置或确认 Pegasus 等高级间谍软件是否存在。网页显示正常不等于手机没有感染。</p>
+<div class="note danger">如果你是高风险目标，或怀疑遭到针对性监控，不要依赖网页扫描结论。使用另一台可信设备联系 Apple 支持或具备移动设备取证能力的专业机构；可了解 Apple 的锁定模式（Lockdown Mode）。</div>
+</section>
+<footer>AEGIS WEB · 检查结果仅在此设备本地生成</footer>
+</main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+let latest=[];
+function add(title,state,detail){latest.push({title,state,detail});}
+function dotClass(state){return state==='可用'||state==='正常'||state==='已启用'?'ok':state==='不支持'||state==='无法确认'?'na':'warn';}
+function render(){
+ const root=$('results');root.replaceChildren();
+ for(const item of latest){const row=document.createElement('div');row.className='result';const dot=document.createElement('span');dot.className='dot '+dotClass(item.state);const body=document.createElement('div');body.className='rbody';const title=document.createElement('div');title.className='rtitle';title.textContent=item.title;const detail=document.createElement('div');detail.className='rdetail';detail.textContent=item.detail;body.append(title,detail);const tag=document.createElement('span');tag.className='tag';tag.textContent=item.state;row.append(dot,body,tag);root.append(row);}
+ const warnings=latest.filter(x=>x.state==='需要注意').length;const unavailable=latest.filter(x=>x.state==='不支持'||x.state==='无法确认').length;
+ $('summary').textContent='完成 '+latest.length+' 项网页环境检查；需要注意 '+warnings+' 项；无法由网页确认 '+unavailable+' 项。此数字不是手机感染风险评分。';
+}
+async function check(){
+ latest=[];const secure=window.isSecureContext;add('HTTPS 安全上下文',secure?'正常':'需要注意',secure?'当前页面处于安全上下文。':'当前页面不是安全上下文；请通过 HTTPS 打开。');
+ add('Web Crypto 加密接口',crypto&&crypto.subtle?'可用':'需要注意',crypto&&crypto.subtle?'浏览器提供 Web Crypto；这不代表 iOS 系统未受感染。':'无法使用 Web Crypto。');
+ add('IndexedDB 本地数据库',('indexedDB'in window)?'可用':'需要注意',('indexedDB'in window)?'浏览器提供本地数据库接口。':'浏览器未提供 IndexedDB。');
+ try{const estimate=navigator.storage&&navigator.storage.estimate?await navigator.storage.estimate():null;if(estimate){const used=Number(estimate.usage||0);const quota=Number(estimate.quota||0);add('浏览器存储空间','可用','已用约 '+(used/1048576).toFixed(1)+' MB；估计配额约 '+(quota/1048576).toFixed(1)+' MB。配额会变化，浏览器可清理网站数据。');}else add('浏览器存储空间','不支持','当前 Safari 未提供存储估算接口。');}catch(e){add('浏览器存储空间','无法确认','浏览器未能提供存储估算。');}
+ add('Service Worker 离线能力',('serviceWorker'in navigator)?'可用':'不支持',('serviceWorker'in navigator)?(navigator.serviceWorker.controller?'当前页面由 Service Worker 控制。':'浏览器支持 Service Worker，但当前页面尚未由其控制；首次加载后可能需要重新打开。'):'当前浏览器环境不支持 Service Worker。');
+ add('权限查询接口',navigator.permissions&&navigator.permissions.query?'可用':'不支持',navigator.permissions&&navigator.permissions.query?'可尝试读取部分网页权限状态；Safari 可能不支持所有权限名称。':'Safari 未提供通用 Permissions API；请按下方系统向导手动检查。');
+ if(navigator.permissions&&navigator.permissions.query){for(const name of ['camera','microphone','geolocation']){try{const p=await navigator.permissions.query({name});add(name==='camera'?'网页摄像头权限':name==='microphone'?'网页麦克风权限':'网页定位权限',p.state==='granted'?'需要注意':p.state==='denied'?'正常':'无法确认','当前浏览器报告状态：'+p.state+'。这是本网站所在浏览器上下文的权限状态，不代表其他 App 的权限。');}catch(e){add(name==='camera'?'网页摄像头权限':name==='microphone'?'网页麦克风权限':'网页定位权限','不支持','Safari 未开放此权限名称的查询。');}}}else{add('网页摄像头/麦克风/定位权限','不支持','此 Safari 未提供可用的权限查询接口；请在 iPhone 设置中检查各 App 权限。');}
+ add('浏览器联网状态',navigator.onLine?'正常':'需要注意',navigator.onLine?'浏览器报告当前处于联网状态。':'浏览器报告当前离线；这不表示设备被隔离或受到攻击。');
+ add('电池与系统进程扫描','不支持','网页不能读取 iPhone 电池诊断数据、系统进程、其他 App 活动或系统级恶意软件扫描结果。');
+ add('iPhone 配置文件与 MDM','无法确认','网页不能读取 VPN、描述文件或设备管理清单；请在 设置 → 通用 → VPN 与设备管理 中核查。');
+ add('Apple 账户设备列表','无法确认','网页无法读取 Apple 账户设备列表；请在 iPhone 设置中查看账户设备。');
+ render();
+}
+$('run').addEventListener('click',check);
+$('clear').addEventListener('click',()=>{document.querySelectorAll('#checklist input').forEach(x=>x.checked=false);});
+$('report').addEventListener('click',()=>{
+ const report={product:'AEGIS Web Privacy Check',generatedAt:new Date().toISOString(),notice:'仅为当前网页环境检查，不是 iPhone 系统扫描或恶意软件检测。',browser:{userAgent:navigator.userAgent,language:navigator.language,online:navigator.onLine,secureContext:isSecureContext},webChecks:latest,completedSelfChecks:Array.from(document.querySelectorAll('#checklist input:checked')).map(x=>x.dataset.item)};
+ const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='aegis-privacy-check-report.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
+});
+check();
+</script>
+</body>
+</html>
